@@ -1,0 +1,10 @@
+{
+	"startDeg" : 208,
+    "endDeg" : 154,
+    "defaultTargetTemp" : 72,
+	"defaultCurrentTemp" : 72,
+	"minTargetTemp" : 50,
+	"maxTargetTemp" : 80,
+	"minCurrentTemp" : 32,
+	"maxCurrentTemp" : 100
+}
