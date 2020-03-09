@@ -1,3 +1,26 @@
+Repo URL: https://github.com/dingheng4448/React-Thermostat-Radial-Slider
+
+## Folder Structure
+
+React-Thermostat-Radial-Slider/
+* src/
+	* images/
+		* radialLines.png (To render the grooves on the radial)
+	* model/
+		* ThermostatMachine.js (Describes the statechart for the thermostat and also contains the business logic to determine the mode of the thermostat.)
+		* ThermostatModel.js (Describes the default settings for the thermostat.)
+	* view/
+		* current-temp-input-view.css (Styling for the current temperature input view below the thermostat.)
+		* CurrentTempInputView.js (Renders the current temperature input view.)
+		* thermostat-view.css (Styling for the thermostat view.)
+		* ThermostatView.js (Renders the thermostat view and all its subcomponents. Also contains UI logic to dynamically render the UI.)
+	* App.css
+	* App.js (Parent component of the ThermostatView and CurrentTempInputView. Manages the state which subcomponents rely on to dynamically render their views.)
+	* index.css
+	* index.js
+	* ThermostatSettings.json (Holds the data of the default settings for the thermostat.)
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
