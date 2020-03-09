@@ -6,5 +6,8 @@
 	"minTargetTemp" : 50,
 	"maxTargetTemp" : 80,
 	"minCurrentTemp" : 32,
-	"maxCurrentTemp" : 100
+	"maxCurrentTemp" : 100,
+	"bufferComfort" : 2,
+	"bufferCool" : 1.5,
+	"bufferHeat" : 1
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import './current-temp-input-view.css';
 
+// Renders the CurrentTempInputView which encompasses of the number and range inputs.
 class CurrentTempInputView extends React.Component {
 	render() {
 		return (

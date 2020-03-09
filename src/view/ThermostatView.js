@@ -2,6 +2,9 @@ import React from 'react';
 import './thermostat-view.css';
 import radialLines from '../images/radialLines.png';
 
+
+
+// Renders the view of the thermostat which encompasses all the subcomponents found below. 
 class ThermostatView extends React.Component {
 	render() {
 		return (
@@ -18,6 +21,7 @@ class ThermostatView extends React.Component {
 	}
 }
 
+// Renders the MainPanel which encompasses the ProtrudingPanel.
 class MainPanel extends React.Component {
 	render() {
 		return (
@@ -38,6 +42,8 @@ class MainPanel extends React.Component {
 	}
 }
 
+// Renders the ProtrudingPanel which encompasses the RadialPanel.
+// dropshadow filter is used to apply a shadow to the panel.
 class ProtrudingPanel extends React.Component {
 	render() {
 		return (
@@ -74,13 +80,16 @@ class ProtrudingPanel extends React.Component {
 	}
 }
 
+// Renders the RadialPanel which encompasses the RadialBackground, RadialBorder, 
+// RadialTrackerPath, TargetTemperatureIndicator and CurrentTemperatureIndicator.
 class RadialPanel extends React.Component {
 	render() {
 		return (
 			<div className="radial-panel">
 				<RadialBackground mode={this.props.mode} />
 				<RadialBorder />
-				<RadialMarkings 
+				<RadialTrackerPath 
+					targetTemp={this.props.targetTemp}
 					thermostatSettings={this.props.thermostatSettings} 
 					onChangeTargetTemp={this.props.onChangeTargetTemp} 
 				/>
@@ -92,6 +101,8 @@ class RadialPanel extends React.Component {
 	}
 }
 
+// Renders the RadialBackground depending on the thermostat's mode from XState.
+// An angled linear gradient is applied to the background to reproduce the required UI.
 class RadialBackground extends React.Component {	
 	render() {
 		let topColor = "LightGrey";
@@ -102,28 +113,17 @@ class RadialBackground extends React.Component {
 			case "off":
 				topColor = "LightGrey";
 				botColor = "rgb(81,83,90)";
-				console.log("Mode: " + currentMode + 
-							", Top Color: " + topColor + 
-							", Bottom Color: " + botColor);
 				break;
 			case "cooling":
 				topColor = "PowderBlue";
 				botColor = "rgb(41,155,232)";
-				console.log("Mode: " + currentMode + 
-							", Top Color: " + topColor + 
-							", Bottom Color: " + botColor);
 				break;
 			case "heating":
 				topColor = "LightSalmon";
 				botColor = "rgb(255,99,99)";
-				console.log("Mode: " + currentMode + 
-							", Top Color: " + topColor + 
-							", Bottom Color: " + botColor);
 				break;
 			default:
-				console.log("Mode: " + currentMode + 
-							", Top Color: " + topColor + 
-							", Bottom Color: " + botColor);
+				break;
 		}
 		
 		return (
@@ -144,6 +144,8 @@ class RadialBackground extends React.Component {
 	}
 }
 
+// Renders the RadialBorder which is made up of 2 different arc paths.
+// The top arc path has a linear gradient applied to it to reproduce the required UI.
 class RadialBorder extends React.Component {
 	render() {
 		return (
@@ -165,7 +167,11 @@ class RadialBorder extends React.Component {
 	}
 }
 
-class RadialMarkings extends React.Component {
+// Renders the RadialTrackerPath which encompasses the RadialLines and RadialTracker.
+// RadialLines is an image of the grooves on the radial. It is overlaid by the RadialTracker.
+// The mouse drag event is accomplished by linking onMouseDown, onMouseMove, onMouseUp.
+// The mouse scroll event is accomplished by onWheel.
+class RadialTrackerPath extends React.Component {
 	constructor(props) {
 		super(props);
 		
@@ -175,19 +181,27 @@ class RadialMarkings extends React.Component {
 		this.defaultTargetTemp = this.props.thermostatSettings.defaultTargetTemp;
 		this.minTargetTemp = this.props.thermostatSettings.minTargetTemp;
 		this.maxTargetTemp = this.props.thermostatSettings.maxTargetTemp;
-		// Calculate degree range
-		this.degRange = (360 - this.startDeg) + this.endDeg;	
-		// Calculate target temp range
-		this.targetTempRange = this.maxTargetTemp+1 - this.minTargetTemp;	// Consider if necessary to have maxTargetTemp+1
-		// Calculate default degree of rotation for the radial tracker
-		const defaultTrackerDeg = ((this.defaultTargetTemp - this.minTargetTemp) * 
-									(this.degRange / this.targetTempRange)) + 
-									this.startDeg;
+		this.degRange = this.props.thermostatSettings.degRange;
+		this.targetTempRange = this.props.thermostatSettings.targetTempRange;
+		this.defaultTrackerDeg = this.props.thermostatSettings.defaultTrackerDeg;
 		
 		this.state = { 
-			transformTrackerDeg: defaultTrackerDeg,
+			transformTrackerDeg: this.defaultTrackerDeg,
 			isDragging: false
 		};
+	}
+	
+	componentDidMount() {
+		// Add event listener for the custom event angleChange
+		document.addEventListener('angleChange', function(e) {
+			console.log("(CUSTOM EVENT) New angle: " + e.detail.newAngle);
+		})
+	}
+
+	componentWillUnmount() {
+		document.removeEventListener('angleChange', function(e) {
+			console.log("(CUSTOM EVENT) New angle: " + e.detail.newAngle);
+		})
 	}
 	
 	mousePressed = e => {
@@ -209,9 +223,11 @@ class RadialMarkings extends React.Component {
 			// Calculate angle between radial center and mouse pos
 			let angle = Math.atan2(delta_y, delta_x) * (180 / Math.PI); 
 			console.log("Calculated angle: " + angle);
+			
 			// Adjust angle to start at 0 from the top
 			angle -= 90;
 			console.log("Adjusted angle: " + angle);
+			
 			// Calculate positive angle
 			if (angle < 0) {
 				angle = 360 + angle; 
@@ -225,17 +241,26 @@ class RadialMarkings extends React.Component {
 			}
 			
 			// Calculate new target temperature
-			let newAngle = angle;
-			if (0 <= newAngle && newAngle <= this.endDeg) {
-				newAngle += 360;
+			// A temporary value (tmpAngle) is needed to handle the case when angle is between 0 and endDeg
+			let tmpAngle = angle;
+			if (0 <= tmpAngle && tmpAngle <= this.endDeg) {
+				tmpAngle += 360;
 			}
-			let newTargetTemp = Math.floor(((newAngle - this.startDeg) * 
+			let newTargetTemp = Math.floor(((tmpAngle - this.startDeg) * 
 											(this.targetTempRange / this.degRange)) + 
 											this.minTargetTemp);
 			
 			// Update variables in state
 			this.setState({transformTrackerDeg:angle});
 			this.props.onChangeTargetTemp(newTargetTemp);
+			
+			// Fire a custom event each time the selected angle changes
+			let angleChangeEvent = new CustomEvent('angleChange', {
+				detail: {
+					newAngle: angle
+				}
+			});
+			document.dispatchEvent(angleChangeEvent);
 		}
 	}
 	
@@ -243,10 +268,53 @@ class RadialMarkings extends React.Component {
 		e.preventDefault();
 		this.setState({isDragging:false});
 	}
-  
+	
+	processScroll = e => {
+		let y = e.deltaY;
+		let newTargetTemp;
+		
+		// If y > 0, user is scrolling down hence the increase in target temp
+		// else, user is scrolling up hence the decrease in target temp
+		if (y > 0) {
+			newTargetTemp = this.props.targetTemp + 1;
+			if (newTargetTemp > this.maxTargetTemp) {
+				newTargetTemp = this.maxTargetTemp;
+			}
+		} else {
+			newTargetTemp = this.props.targetTemp - 1;
+			if (newTargetTemp < this.minTargetTemp) {
+				newTargetTemp = this.minTargetTemp;
+			}
+		}
+		
+		// Calculate new angle for the new target temp
+		let angle = ((newTargetTemp - this.minTargetTemp) * 
+					(this.degRange / this.targetTempRange)) + 
+					this.startDeg;
+		if (angle > 360) {
+			angle -= 360;
+		}
+		
+		// Update variables in state
+		this.setState({transformTrackerDeg:angle});
+		this.props.onChangeTargetTemp(newTargetTemp);
+		
+		// Fire a custom event each time the selected angle changes
+		let angleChangeEvent = new CustomEvent('angleChange', {
+			detail: {
+				newAngle: angle
+			}
+		});
+		document.dispatchEvent(angleChangeEvent);
+	}
+ 
 	render() {
 		return (
-			<div className="radial-markings" onMouseDown={this.mousePressed} onMouseMove={this.processDrag} onMouseUp={this.mouseReleased}>
+			<div className="radial-tracker-path" 
+				onMouseDown={this.mousePressed} 
+				onMouseMove={this.processDrag} 
+				onMouseUp={this.mouseReleased}
+				onWheel={this.processScroll}>
 				<img id="radial-lines" src={radialLines} alt="radialLines" />
 				<RadialTracker transformTrackerDeg={this.state.transformTrackerDeg}/>
 			</div>
@@ -254,8 +322,10 @@ class RadialMarkings extends React.Component {
 	}
 }
 
+// Renders the RadialTracker.
 class RadialTracker extends React.Component {
 	render() {
+		// Apply transformation to rotate the radial tracker
 		const styles = { 
 			transform: "rotate(" + this.props.transformTrackerDeg + "deg)" 
 		};
@@ -266,6 +336,7 @@ class RadialTracker extends React.Component {
 	}
 }
 
+// Renders the TargetTemperatureIndicator.
 class TargetTemperatureIndicator extends React.Component {
 	render() {
 		return (
@@ -276,6 +347,7 @@ class TargetTemperatureIndicator extends React.Component {
 	}
 }
 
+// Renders the CurrentTemperatureIndicator.
 class CurrentTemperatureIndicator extends React.Component {
 	render() {
 		return (

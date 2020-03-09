@@ -39,10 +39,10 @@
 }
 
 /* 
-	.radial-markings & .radial-markings:before is used to setup the radial slider.
+	.radial-tracker-path & .radial-tracker-path:before is used to setup the path of radial slider.
 	Uncomment the box-shadow to display the full slider path.
 */
-.radial-markings {
+.radial-tracker-path {
   position: absolute;
   z-index: 4;
   top: 20%;
@@ -53,7 +53,7 @@
   height: 60%;
   //box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
-.radial-markings:before {
+.radial-tracker-path:before {
   content: "";
   position: absolute;
   width: 90%;
@@ -68,7 +68,7 @@
 /* 
 	.radial-tracker & .radial-tracker:before is used to setup the radial slider's tracker.
 */
-.radial-markings .radial-tracker {
+.radial-tracker-path .radial-tracker {
   position: absolute;
   width: 5%;
   height: 50%;
@@ -78,7 +78,7 @@
   transform-origin: center bottom;
   
 }
-.radial-markings .radial-tracker:before {
+.radial-tracker-path .radial-tracker:before {
   content: "";
   position: absolute;
   background-color: rgb(255,192,0);

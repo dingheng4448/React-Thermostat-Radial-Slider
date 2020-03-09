@@ -1,12 +1,14 @@
 import React from 'react';
 import './App.css';
+import { interpret } from 'xstate';
 
 // React components (Views & ViewModels)
 import ThermostatView from './view/ThermostatView';
 import CurrentTempInputView from './view/CurrentTempInputView';
 
-// Model classes
+// Model 
 import ThermostatModel from './model/ThermostatModel.js';
+import { ThermostatMachine } from './model/ThermostatMachine';
 
 // Data to populate Model
 import settingsData from './ThermostatSettings.json'
@@ -23,59 +25,59 @@ class App extends React.Component {
 			settingsData.minTargetTemp,
 			settingsData.maxTargetTemp,
 			settingsData.minCurrentTemp,
-			settingsData.maxCurrentTemp
+			settingsData.maxCurrentTemp,
+			settingsData.bufferComfort,
+			settingsData.bufferCool,
+			settingsData.bufferHeat
 		);
 	
         this.state = {
 			targetTemp: this.thermostatSettings.defaultTargetTemp,
 			currentTemp: this.thermostatSettings.defaultCurrentTemp,
-			mode: "off"
-        }
+			thermostatState: ThermostatMachine.initialState
+        }; 
     }
 	
+	// For every transition set the state of the machine as current state
+	service = interpret(ThermostatMachine).onTransition(current =>
+		this.setState({ thermostatState: current })
+	);
+
+	// Start the service when the component is mounted
+	componentDidMount() {
+		this.service.start();
+	}
+
+	// Stop the service when the component is unmounted
+	componentWillUnmount() {
+		this.service.stop();
+	}
+	
 	updateTargetTemp = (newTargetTemp) => {
-		this.updateMode(newTargetTemp , this.state.currentTemp);
-		
+		this.service.send({type: 'TEMP_CHANGE', targetTemp: newTargetTemp, currentTemp: this.state.currentTemp });
         this.setState({
 			targetTemp: newTargetTemp
 		});
     }
 	
 	updateCurrentTemp = e => {
-		this.updateMode(this.state.targetTemp , e.target.value);
-		
+		this.service.send({type: 'TEMP_CHANGE', targetTemp: this.state.targetTemp, currentTemp: e.target.value });
         this.setState({
 			currentTemp: e.target.value
 		});
     }
 	
-	updateMode = (targetTemp, currentTemp) => {
-		let currentMode = this.state.mode;
+	render() { 
+		// Retrieve thermostat mode from XState
+		let mode = this.state.thermostatState.value;
 		
-		if (currentTemp > (targetTemp + 2 + 1.5)) {
-			currentMode = "cooling";
-		}
-		if (currentTemp < (targetTemp - 2 - 1)) {
-			currentMode = "heating";
-		}
-		if ((targetTemp - 2 - 1.5) < currentTemp && 
-			currentTemp < (targetTemp + 2 - 1.5)) {
-			currentMode = "off";
-		}
-		
-        this.setState({
-			mode: currentMode
-		});
-	}
-	
-	render() {
-		return (
+		return ( 
 			<div>
 				<ThermostatView 
 					thermostatSettings={this.thermostatSettings} 
 					targetTemp={this.state.targetTemp}
 					currentTemp={this.state.currentTemp} 
-					mode={this.state.mode}
+					mode={mode}
 					onChangeTargetTemp={this.updateTargetTemp}
 				/>
 				<CurrentTempInputView 
