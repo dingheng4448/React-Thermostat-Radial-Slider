@@ -1,13 +1,13 @@
 class ThermostatModel {
 	
-    // Constructor function to initialize object
+	// Constructor function to initialize object
 	constructor(startDeg, endDeg, defaultTargetTemp, defaultCurrentTemp,
 		minTargetTemp, maxTargetTemp, minCurrentTemp, maxCurrentTemp,
 		bufferComfort, bufferCool, bufferHeat) {
 			
-        this.startDeg = startDeg;
-        this.endDeg = endDeg;
-        this.defaultTargetTemp = defaultTargetTemp;
+		this.startDeg = startDeg;
+		this.endDeg = endDeg;
+		this.defaultTargetTemp = defaultTargetTemp;
 		this.defaultCurrentTemp = defaultCurrentTemp;
 		this.minTargetTemp = minTargetTemp;
 		this.maxTargetTemp = maxTargetTemp;
@@ -28,7 +28,7 @@ class ThermostatModel {
 		this.defaultTrackerDeg = ((this.defaultTargetTemp - this.minTargetTemp) * 
 									(this.degRange / this.targetTempRange)) + 
 									this.startDeg;
-    }
+	}
 }
 
 export default ThermostatModel;

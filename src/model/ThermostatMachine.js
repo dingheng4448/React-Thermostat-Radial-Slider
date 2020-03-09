@@ -84,7 +84,7 @@ export const ThermostatMachine = Machine(
 				}
 			}
 		}
-    },
+	},
 	{
 		// Functions to help check if the current temperature is acceptable/too hot/too cold against the target temperature
 		guards: {

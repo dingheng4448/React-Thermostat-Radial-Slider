@@ -15,7 +15,7 @@ import settingsData from './ThermostatSettings.json'
 
 class App extends React.Component {
 	constructor(props){
-        super(props);	
+		super(props);	
 
 		this.thermostatSettings = new ThermostatModel(
 			settingsData.startDeg,
@@ -31,12 +31,12 @@ class App extends React.Component {
 			settingsData.bufferHeat
 		);
 	
-        this.state = {
+		this.state = {
 			targetTemp: this.thermostatSettings.defaultTargetTemp,
 			currentTemp: this.thermostatSettings.defaultCurrentTemp,
 			thermostatState: ThermostatMachine.initialState
-        }; 
-    }
+		}; 
+	}
 	
 	// For every transition set the state of the machine as current state
 	service = interpret(ThermostatMachine).onTransition(current =>
@@ -55,17 +55,17 @@ class App extends React.Component {
 	
 	updateTargetTemp = (newTargetTemp) => {
 		this.service.send({type: 'TEMP_CHANGE', targetTemp: newTargetTemp, currentTemp: this.state.currentTemp });
-        this.setState({
+		this.setState({
 			targetTemp: newTargetTemp
 		});
-    }
+	}
 	
 	updateCurrentTemp = e => {
 		this.service.send({type: 'TEMP_CHANGE', targetTemp: this.state.targetTemp, currentTemp: e.target.value });
-        this.setState({
+		this.setState({
 			currentTemp: e.target.value
 		});
-    }
+	}
 	
 	render() { 
 		// Retrieve thermostat mode from XState
